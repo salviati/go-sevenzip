@@ -16,10 +16,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	
+	fmt.Println("Number of files in the archive: ", len(z.File))
 
-	for _, f := range z.File {
+	for i, f := range z.File {
+		if i==1 {continue}
 		fmt.Println("Extracting ", f.Name)
-		r, err := f.Open()
+		if f.IsDir != 0 { continue }
+		/*r, err := f.Open()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -29,8 +33,12 @@ func main() {
 		_, err = r.Read(file)
 		if err != nil {
 			log.Fatal(err)
+		}*/
+		file, err := z.ExtractUnsafe(i)
+		if err != nil {
+			log.Fatal(err)
 		}
-
-		ioutil.WriteFile(f.Name, file, 0666)
+		ioutil.WriteFile(fmt.Sprint("/tmp/hello",i), file, 0666)
+		fmt.Println("done")
 	}
 }

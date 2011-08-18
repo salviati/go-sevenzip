@@ -156,6 +156,10 @@ func (f *File) Open() (*bytes.Buffer, os.Error) {
 	return bytes.NewBuffer(buf), err
 }
 
+func (f *File) Close() {
+	
+}
+
 // This function will call ExtractUnsafe.
 func (f *File) OpenUnsafe() (*bytes.Buffer, os.Error) {
 	buf, err := f.z.ExtractUnsafe(f.Index)
@@ -270,7 +274,7 @@ func (z *SevenZip) ExtractUnsafe(i int) ([]byte, os.Error) {
 	clen := int(outSizeProcessed)
 
 	file := (*[1 << 30]byte)(unsafe.Pointer(cbuf))[:clen]
-	(*reflect.SliceHeader)(unsafe.Pointer(&cbuf)).Cap = clen
+	(*reflect.SliceHeader)(unsafe.Pointer(&file)).Cap = clen
 
 	return file, nil
 }
