@@ -47,7 +47,7 @@ func main() {
 
 		dir, _ := filepath.Split(f.Name)
 		if dir != "" {
-			if err = os.MkdirAll(dir, 755); err != nil {
+			if err = os.MkdirAll(dir, 0755); err != nil {
 				log.Fatal(err)
 			}
 		}
