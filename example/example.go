@@ -31,6 +31,6 @@ func main() {
 			log.Fatal(err)
 		}
 
-		ioutil.WriteFile(f.Name, f.Dump(), 0666)
+		ioutil.WriteFile(f.Name, file, 0666)
 	}
 }
