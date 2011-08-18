@@ -30,7 +30,7 @@ void MY_FAST_CALL CrcGenerateTable()
   #endif
 }
 
-UInt32 MY_FAST_CALL CrcUpdateT8(UInt32 v, const void *data, size_t size, const UInt32 *table);
+extern UInt32 MY_FAST_CALL CrcUpdateT8(UInt32 v, const void *data, size_t size, const UInt32 *table);
 
 UInt32 MY_FAST_CALL CrcUpdate(UInt32 v, const void *data, size_t size)
 {

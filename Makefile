@@ -7,7 +7,7 @@ USEASM=1
 
 ifeq ($(USEASM), 1)
 	ifeq ($(O), 6)
-		ASM=yasm -f elf -m amd64
+		ASM=nasm -f elf64
 		CGO_OFILES+= 7zCrcT8U.$(O).o 7zCrcT8.o
 	else ifeq ($(O), 8)
 		ASM=nasm -f elf
