@@ -21,16 +21,17 @@ func main() {
 
 	fmt.Println("Number of files in the archive: ", len(z.File))
 
- 	for _, f := range z.File {
+	for _, f := range z.File {
 		if f.IsDir != 0 {
 			continue
 		}
-		
+
 		fi, err := os.Stat(f.Name)
 		if err == nil && uint64(fi.Size) == f.Size {
-			fmt.Println("File ", f.Name, " already exists, skipping"); continue
+			fmt.Println("File ", f.Name, " already exists, skipping")
+			continue
 		}
-		
+
 		fmt.Println("Extracting ", f.Name)
 		r, err := f.Open()
 		if err != nil {
@@ -43,7 +44,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err)
 		}
-		
+
 		dir, _ := filepath.Split(f.Name)
 		if dir != "" {
 			if err = os.MkdirAll(dir, 755); err != nil {
