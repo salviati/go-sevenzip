@@ -179,7 +179,7 @@ func (z *SevenZip) name(i int) string {
 	temp := C.SzAlloc(C._null, length*2)
 	if temp == C._null {
 		panic("sevenzip: out of memory")
-	} //FIXME: don't panic!
+	}
 	defer C.SzFree(C._null, temp)
 
 	C.SzArEx_GetFileNameUtf16(&z.db, C.size_t(i), (*C.UInt16)(temp))
@@ -190,7 +190,7 @@ func (z *SevenZip) name(i int) string {
 	temp2 := C.SzAlloc(C._null, destLen)
 	if temp2 == C._null {
 		panic("sevenzip: out of memory")
-	} //FIXME: don't panic!
+	}
 	defer C.SzFree(C._null, temp2)
 
 	C.Utf16_To_Utf8((*C.Byte)(temp2), &destLen, (*C.UInt16)(temp), length)
@@ -230,12 +230,10 @@ func Open(filename string) (*SevenZip, os.Error) {
 	}
 
 	C.FileInStream_CreateVTable(&z.archiveStream)
-	C.LookToRead_CreateVTable(&z.lookStream, 0) //False??
+	C.LookToRead_CreateVTable(&z.lookStream, 0)
 
 	z.lookStream.realStream = &z.archiveStream.s
 	C.LookToRead_Init(&z.lookStream)
-
-	//   C.CrcGenerateTable();  
 
 	C.SzArEx_Init(&z.db)
 	if C.SzArEx_Open(&z.db, &z.lookStream.s, &z.allocImp, &z.allocTempImp) != C._SZ_OK {
