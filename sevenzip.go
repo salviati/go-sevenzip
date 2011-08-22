@@ -217,6 +217,7 @@ func (z *SevenZip) Close() {
 // Opens a 7-zip archive at a given path.
 func Open(filename string) (*SevenZip, os.Error) {
 	z := new(SevenZip)
+	z.blockIndex = 0xffffffff
 	z.allocImp.Alloc = (*[0]uint8)(C._szAlloc)
 	z.allocImp.Free = (*[0]uint8)(C._szFree)
 	z.allocTempImp.Alloc = (*[0]uint8)(C._szAllocTemp)
@@ -267,14 +268,16 @@ func (z *SevenZip) ExtractUnsafe(i int) ([]byte, os.Error) {
 		&z.blockIndex, &z.outBuffer, &z.outBufferSize,
 		&offset, &outSizeProcessed,
 		&z.allocImp, &z.allocTempImp) != C._SZ_OK {
-		return []byte{}, os.NewError("extract failed")
+		return []byte{}, os.NewError("sevenzip: extract failed")
 	}
 
 	cbuf := C._ByteArrayIndex(z.outBuffer, offset)
 	clen := int(outSizeProcessed)
 
 	file := (*[1 << 30]byte)(unsafe.Pointer(cbuf))[:clen]
-	(*reflect.SliceHeader)(unsafe.Pointer(&file)).Cap = clen
+	hdr := (*reflect.SliceHeader)(unsafe.Pointer(&file))
+	hdr.Cap = clen
+	hdr.Len = clen
 
 	return file, nil
 }
@@ -295,6 +298,6 @@ func (z *SevenZip) Extract(i int) ([]byte, os.Error) {
 	}
 	file := make([]byte, len(cfile))
 	copy(file, cfile)
-	z.flushBuffer()
+
 	return file, nil
 }

@@ -33,17 +33,18 @@ func main() {
 		}
 
 		fmt.Println("Extracting ", f.Name)
-		r, err := f.Open()
+		//r, err = f.Open()
+		_, err = f.OpenUnsafe()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		//file := f.ReadAll()
-		file := make([]byte, f.Size)
+		file := f.ReadAll()
+		/* file := make([]byte, f.Size)
 		_, err = r.Read(file)
 		if err != nil {
 			log.Fatal(err)
-		}
+		} */
 
 		dir, _ := filepath.Split(f.Name)
 		if dir != "" {
