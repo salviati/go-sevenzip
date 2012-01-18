@@ -1,13 +1,13 @@
 package main
 
 import (
-	sz "sevenzip"
-	"fmt"
 	"flag"
-	"log"
+	"fmt"
 	"io/ioutil"
-	"path/filepath"
+	"log"
 	"os"
+	"path/filepath"
+	sz "sevenzip"
 )
 
 var filename = flag.String("f", "example.7z", "Filename")
@@ -27,7 +27,7 @@ func main() {
 		}
 
 		fi, err := os.Stat(f.Name)
-		if err == nil && uint64(fi.Size) == f.Size {
+		if err == nil && uint64(fi.Size()) == f.Size {
 			fmt.Println("File ", f.Name, " already exists, skipping")
 			continue
 		}

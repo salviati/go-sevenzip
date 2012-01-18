@@ -19,6 +19,7 @@
 */
 
 package sevenzip
+
 // Package sevenzip implements access to 7-zip archives (wraps C interface of LZMA SDK).
 
 // #include "7z.h"
@@ -92,11 +93,12 @@ package sevenzip
 import "C"
 
 import (
-	"unsafe"
-	"os"
-	"sync"
-	"reflect"
 	"bytes"
+	"errors"
+
+	"reflect"
+	"sync"
+	"unsafe"
 )
 
 type SevenZip struct {
@@ -147,7 +149,7 @@ func (f *File) ReadAll() []byte {
 }
 
 // This function will call Extract.
-func (f *File) Open() (*bytes.Buffer, os.Error) {
+func (f *File) Open() (*bytes.Buffer, error) {
 	buf, err := f.z.Extract(f.Index)
 	if err != nil {
 		return nil, err
@@ -157,11 +159,11 @@ func (f *File) Open() (*bytes.Buffer, os.Error) {
 }
 
 func (f *File) Close() {
-	
+
 }
 
 // This function will call ExtractUnsafe.
-func (f *File) OpenUnsafe() (*bytes.Buffer, os.Error) {
+func (f *File) OpenUnsafe() (*bytes.Buffer, error) {
 	buf, err := f.z.ExtractUnsafe(f.Index)
 	if err != nil {
 		return nil, err
@@ -215,7 +217,7 @@ func (z *SevenZip) Close() {
 //The whole *[0]uint8 thing is a mystery to me.
 
 // Opens a 7-zip archive at a given path.
-func Open(filename string) (*SevenZip, os.Error) {
+func Open(filename string) (*SevenZip, error) {
 	z := new(SevenZip)
 	z.blockIndex = 0xffffffff
 	z.allocImp.Alloc = (*[0]uint8)(C._szAlloc)
@@ -226,7 +228,7 @@ func Open(filename string) (*SevenZip, os.Error) {
 	cfilename := C.CString(filename)
 	defer C.free(unsafe.Pointer(cfilename))
 	if C.InFile_Open(&z.archiveStream.file, cfilename) != 0 {
-		return nil, os.NewError("sevenzip: file not found: " + filename)
+		return nil, errors.New("sevenzip: file not found: " + filename)
 	}
 
 	C.FileInStream_CreateVTable(&z.archiveStream)
@@ -237,7 +239,7 @@ func Open(filename string) (*SevenZip, os.Error) {
 
 	C.SzArEx_Init(&z.db)
 	if C.SzArEx_Open(&z.db, &z.lookStream.s, &z.allocImp, &z.allocTempImp) != C._SZ_OK {
-		return nil, os.NewError("sevenzip: failed to open archive: " + filename)
+		return nil, errors.New("sevenzip: failed to open archive: " + filename)
 	}
 
 	z.File = make([]*File, int(z.db.db.NumFiles))
@@ -258,7 +260,7 @@ func Open(filename string) (*SevenZip, os.Error) {
 // Unless your data is too big, and you are prepared to
 // avoid using another call to mentioned functions during the life-time of
 // the returned array, do not use this function.
-func (z *SevenZip) ExtractUnsafe(i int) ([]byte, os.Error) {
+func (z *SevenZip) ExtractUnsafe(i int) ([]byte, error) {
 	var outSizeProcessed, offset C.size_t
 
 	if C.SzArEx_Extract(
@@ -266,7 +268,7 @@ func (z *SevenZip) ExtractUnsafe(i int) ([]byte, os.Error) {
 		&z.blockIndex, &z.outBuffer, &z.outBufferSize,
 		&offset, &outSizeProcessed,
 		&z.allocImp, &z.allocTempImp) != C._SZ_OK {
-		return []byte{}, os.NewError("sevenzip: extract failed")
+		return []byte{}, errors.New("sevenzip: extract failed")
 	}
 
 	cbuf := C._ByteArrayIndex(z.outBuffer, offset)
@@ -286,7 +288,7 @@ func (z *SevenZip) ExtractUnsafe(i int) ([]byte, os.Error) {
 // buffer is flushed.
 // The catch is, this function, during it's execution,
 // will use up double of the size of the ith file.
-func (z *SevenZip) Extract(i int) ([]byte, os.Error) {
+func (z *SevenZip) Extract(i int) ([]byte, error) {
 	z.l.Lock()
 	defer z.l.Unlock()
 
