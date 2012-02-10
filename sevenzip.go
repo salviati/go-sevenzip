@@ -21,7 +21,7 @@
 package sevenzip
 
 // Package sevenzip implements access to 7-zip archives (wraps C interface of LZMA SDK).
- 
+
 // #include "7z.h"
 // #include "7zAlloc.h"
 // #include "7zCrc.h"
