@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	sz "sevenzip"
+	sz "github.com/salviati/go-sevenzip/sevenzip"
 )
 
 var filename = flag.String("f", "example.7z", "Filename")
